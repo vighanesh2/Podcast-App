@@ -1,180 +1,225 @@
-# Podcast App
+# 🌙 Sno Cast - Sleep Podcast App
 
-A beautiful, modern React Native podcast app built with Expo. Features a dark theme, interactive podcast cards, and a sleek user interface.
+A beautiful sleep-themed podcast app that helps you fall asleep with boring podcasts. Built with React Native and MongoDB.
 
-## Features
+## ✨ Features
 
-- 🎧 **Modern UI Design** - Dark theme with beautiful gradients and smooth animations
-- 📱 **Responsive Layout** - Optimized for both phones and tablets
-- 🎵 **Interactive Podcast Cards** - Tap to play/pause podcasts
-- 📂 **Category Browsing** - Browse podcasts by different categories
-- 🎨 **Beautiful Images** - High-quality podcast cover images
-- ⚡ **Fast Performance** - Built with React Native for optimal performance
+- **Beautiful Sleep-Themed UI** - Calming design with custom illustrations
+- **User Authentication** - Secure signup/signin with JWT tokens
+- **MongoDB Database** - Persistent user data and listening history
+- **Sleep Preferences** - Customize your sleep schedule and podcast preferences
+- **Listening History** - Track your sleep podcast sessions
 
-## Screenshots
+## 🚀 Quick Start
 
-The app features:
-- A sleek header with app branding
-- A "Now Playing" section that appears when a podcast is selected
-- Horizontal scrolling featured podcasts with cover images
-- Category browsing with pill-shaped buttons
-- Modern dark theme throughout
+### Prerequisites
 
-## Prerequisites
+- Node.js (v16 or higher)
+- MongoDB (local or MongoDB Atlas)
+- Expo CLI
+- React Native development environment
 
-Before running this app, make sure you have:
+### Backend Setup
 
-- Node.js (version 20.19.4 or higher recommended)
-- npm or yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- Expo Go app on your mobile device (for testing)
-
-## Installation
-
-1. **Clone or download this project**
+1. **Navigate to backend directory:**
    ```bash
-   cd podcast-app
+   cd backend
    ```
 
-2. **Install dependencies**
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up environment variables:**
+   ```bash
+   cp env.example .env
+   ```
+   
+   Edit `.env` file with your configuration:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/sno-cast
+   JWT_SECRET=your-super-secret-jwt-key-here
+   JWT_EXPIRE=7d
+   PORT=5000
+   NODE_ENV=development
+   CLIENT_URL=http://localhost:19006
+   ```
+
+4. **Start the backend server:**
+   ```bash
+   npm run dev
+   ```
+
+   The API will be available at `http://localhost:5000`
+
+### Frontend Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start the Expo development server:**
    ```bash
    npm start
    ```
 
-## Running the App
+3. **Run on your device:**
+   - Install Expo Go app on your phone
+   - Scan the QR code from the terminal
+   - Or run on simulator: `npm run ios` or `npm run android`
 
-### On Mobile Device (Recommended)
-1. Install the **Expo Go** app from the App Store (iOS) or Google Play Store (Android)
-2. Run `npm start` in your terminal
-3. Scan the QR code with your phone's camera (iOS) or the Expo Go app (Android)
+## 🗄️ Database Schema
 
-### On iOS Simulator
-```bash
-npm run ios
-```
-
-### On Android Emulator
-```bash
-npm run android
-```
-
-### On Web Browser
-```bash
-npm run web
-```
-
-## Project Structure
-
-```
-podcast-app/
-├── App.js              # Main app component
-├── app.json            # Expo configuration
-├── package.json        # Dependencies and scripts
-├── assets/             # Images and icons
-│   ├── icon.png
-│   ├── splash-icon.png
-│   └── adaptive-icon.png
-└── README.md           # This file
-```
-
-## Key Components
-
-- **App.js** - Main component with podcast data and UI
-- **Header** - App branding and navigation
-- **Now Playing** - Current podcast player (appears when podcast is selected)
-- **Featured Podcasts** - Horizontal scrolling podcast cards
-- **Categories** - Browse podcasts by category
-
-## Customization
-
-### Adding New Podcasts
-Edit the `podcasts` array in `App.js`:
-
+### User Model
 ```javascript
-const podcasts = [
-  {
-    id: 5,
-    title: "Your New Podcast",
-    host: "Host Name",
-    duration: "30 min",
-    image: "https://your-image-url.com/image.jpg",
-    category: "Your Category"
+{
+  username: String (unique, required)
+  email: String (unique, required)
+  password: String (hashed, required)
+  profile: {
+    firstName: String
+    lastName: String
+    avatar: String
+    sleepPreferences: {
+      preferredSleepTime: String
+      wakeUpTime: String
+      favoritePodcastCategories: [String]
+    }
   }
-];
+  subscription: {
+    plan: String (free/premium)
+    startDate: Date
+    endDate: Date
+  }
+  listeningHistory: [{
+    podcastId: String
+    podcastTitle: String
+    listenedAt: Date
+    duration: Number
+    completed: Boolean
+  }]
+  isActive: Boolean
+  lastLogin: Date
+}
 ```
 
-### Changing Colors
-Modify the color scheme in the `styles` object:
+## 🔌 API Endpoints
 
-```javascript
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#0a0a0a', // Dark background
-  },
-  // ... other styles
-});
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/signin` - Login user
+- `POST /api/auth/logout` - Logout user
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/refresh` - Refresh JWT token
+
+### User Management
+- `GET /api/user/profile` - Get user profile
+- `PUT /api/user/profile` - Update user profile
+- `GET /api/user/listening-history` - Get listening history
+- `POST /api/user/listening-history` - Add to listening history
+- `DELETE /api/user/account` - Deactivate account
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React Native
+- Expo
+- AsyncStorage
+- Axios
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT (jsonwebtoken)
+- bcryptjs
+- express-validator
+
+## 📱 Screens
+
+1. **Landing Page** - Beautiful sleep-themed welcome screen
+2. **Sign In** - User authentication
+3. **Sign Up** - User registration
+4. **Home** - Main app interface (when authenticated)
+
+## 🔐 Security Features
+
+- Password hashing with bcrypt
+- JWT token authentication
+- Input validation and sanitization
+- Rate limiting
+- CORS protection
+- Helmet security headers
+
+## 🎨 Design Features
+
+- Custom sleep-themed illustrations
+- Gradient backgrounds
+- Smooth animations
+- Responsive design
+- Beautiful typography
+- Consistent color scheme
+
+## 📦 Project Structure
+
+```
+sno-cast/
+├── backend/
+│   ├── models/
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   └── user.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── server.js
+│   └── package.json
+├── screens/
+│   ├── SignInScreen.js
+│   └── SignUpScreen.js
+├── services/
+│   ├── api.js
+│   └── authService.js
+├── assets/
+│   ├── girl.png
+│   └── sleeping.png
+├── App.js
+└── package.json
 ```
 
-### Adding Categories
-Update the categories array in the Categories section:
+## 🚀 Deployment
 
-```javascript
-{['Technology', 'Wellness', 'Business', 'Arts', 'Science', 'Comedy', 'Your Category'].map((category) => (
-  // ... category rendering
-))}
-```
+### Backend (Heroku/Railway/DigitalOcean)
+1. Set up MongoDB Atlas
+2. Configure environment variables
+3. Deploy backend to your preferred platform
 
-## Technologies Used
+### Frontend (Expo)
+1. Build for production: `expo build`
+2. Submit to app stores or use Expo Go
 
-- **React Native** - Cross-platform mobile development
-- **Expo** - Development platform and tools
-- **React Hooks** - State management (useState)
-- **StyleSheet** - Styling and layout
-- **SafeAreaView** - Safe area handling for different devices
+## 🤝 Contributing
 
-## Development Notes
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-- The app uses placeholder images from Unsplash
-- All podcast data is currently static (no backend integration)
-- The play/pause functionality is UI-only (no actual audio playback)
-- Images are loaded from external URLs (ensure internet connection)
+## 📄 License
 
-## Next Steps
+MIT License - see LICENSE file for details
 
-To make this a fully functional podcast app, consider adding:
+## 🆘 Support
 
-- Audio playback functionality (expo-av)
-- Backend API integration
-- User authentication
-- Podcast search and filtering
-- Favorites and playlists
-- Push notifications
-- Offline listening capabilities
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Metro bundler issues**: Clear cache with `npx expo start --clear`
-2. **Image loading problems**: Check internet connection
-3. **Build errors**: Ensure Node.js version compatibility
-4. **Expo Go connection**: Make sure device and computer are on same network
-
-### Getting Help
-
-- Check the [Expo documentation](https://docs.expo.dev/)
-- Visit [React Native docs](https://reactnative.dev/)
-- Join the [Expo Discord community](https://discord.gg/expo)
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+If you encounter any issues:
+1. Check the console for error messages
+2. Ensure MongoDB is running
+3. Verify environment variables are set correctly
+4. Check network connectivity
 
 ---
 
-**Happy coding! 🎧📱**
+**Sweet dreams! 🌙✨**
