@@ -16,7 +16,7 @@ import {
 
 const { width, height } = Dimensions.get('window');
 
-const HomeScreen = ({ user, onSignOut }) => {
+const HomeScreen = ({ user, onSignOut, navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Mock data for podcasts
@@ -187,7 +187,10 @@ const HomeScreen = ({ user, onSignOut }) => {
           />
           <View style={styles.activeIndicator} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation?.navigate('explore')}
+        >
           <Image 
             source={require('../assets/compass-fill.png')} 
             style={[styles.navIconImage, { tintColor: '#666' }]}

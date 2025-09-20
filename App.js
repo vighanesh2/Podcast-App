@@ -14,11 +14,12 @@ import { authService } from './services/authService';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import HomeScreen from './screens/HomeScreen';
+import ExploreScreen from './screens/ExploreScreen';
 
 const { width, height } = Dimensions.get('window');
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('loading'); // 'loading', 'home', 'signin', 'signup'
+  const [currentScreen, setCurrentScreen] = useState('loading'); // 'loading', 'home', 'signin', 'signup', 'explore'
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -104,6 +105,15 @@ export default function App() {
       <HomeScreen 
         user={user}
         onSignOut={handleSignOut}
+        navigation={{ navigate: setCurrentScreen }}
+      />
+    );
+  }
+
+  if (currentScreen === 'explore') {
+    return (
+      <ExploreScreen 
+        navigation={{ navigate: setCurrentScreen }}
       />
     );
   }
