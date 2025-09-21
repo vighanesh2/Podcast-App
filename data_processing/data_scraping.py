@@ -13,16 +13,17 @@ feeds = [('Sleep With Me', 'https://feed.sleepwithmepodcast.com/'), ('Nothing Mu
 output = []
 temp_output = []
 exports = 0
-restart = 30
+restart = -1
 
 for name,url in feeds:
     resp = requests.get(url)
     soup = BeautifulSoup(resp.text, 'xml')
 
     i = 0
-    if (exports == 0):
-        i = restart
     for entry in soup.find_all('item'):
+        if (exports == 0 and i < restart):
+            i += 1
+            continue
         enclosure = entry.find('enclosure')
         audio_url = enclosure['url'] if enclosure else None
         transcript_text = None
