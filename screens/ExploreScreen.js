@@ -8,7 +8,8 @@ import {
   Image,
   Dimensions,
   StatusBar,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,9 +19,13 @@ const { width, height } = Dimensions.get('window');
 const ExploreScreen = ({ navigation }) => {
   const [description, setDescription] = useState('');
   const [responseText, setResponseText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
     // Define this function somewhere in your component
   const triggerNgrokEndpoint = async () => {
+    if (isLoading) return; // Prevent multiple calls
+    
+    setIsLoading(true);
     try {
       const response = await fetch("https://dd70d0b87321.ngrok-free.app/generate", {
         method: "POST",
@@ -35,6 +40,8 @@ const ExploreScreen = ({ navigation }) => {
       setResponseText(data.response || JSON.stringify(data));
     } catch (error) {
       console.error("Error calling endpoint:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -82,12 +89,24 @@ const ExploreScreen = ({ navigation }) => {
               textAlignVertical="top"
             />
             <TouchableOpacity
-              style={styles.playButton}
+              style={[styles.playButton, isLoading && styles.playButtonDisabled]}
               onPress={triggerNgrokEndpoint}
+              disabled={isLoading}
             >
-            <Text style={styles.playButtonText}>▶</Text>
-          </TouchableOpacity>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.playButtonText}>▶</Text>
+              )}
+            </TouchableOpacity>
         </View>
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Creating your NapCast...</Text>
+          </View>
+        )}
         </View>
       </View>
 
@@ -244,11 +263,24 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  playButtonDisabled: {
+    backgroundColor: '#999',
+    shadowOpacity: 0.1,
+  },
   playButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 2,
+  },
+  loadingContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
   bottomNavigation: {
     position: 'absolute',
