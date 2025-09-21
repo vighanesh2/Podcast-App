@@ -11,6 +11,9 @@ from routes.rss_feeds import rss_feeds_bp
 from routes.analytics import analytics_bp
 from routes.content_templates import content_templates_bp
 from routes.system_config import system_config_bp
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import PeftModel
+import torch
 
 # Load environment variables
 load_dotenv()
@@ -46,6 +49,37 @@ def health_check():
         'message': 'Podcast API is running!',
         'database': 'connected' if db.command('ping') else 'disconnected'
     })
+
+print("STARTING MODEL STUFF")
+
+# Load the Large Language Model (LLM)
+
+model_id = "meta-llama/Meta-Llama-3-8B"
+adapter_dir = "./lora_adapter_initial"
+
+print("HI")
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,                 # Switch to 4-bit
+    bnb_4bit_use_double_quant=True,    # Double quantization to save memory
+    bnb_4bit_quant_type="nf4",         # Best quantization type for accuracy
+    bnb_4bit_compute_dtype="float16"   # Use fp16 math (fp32 is slower but safer)
+)
+
+base_model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb_config,
+    device_map="auto",
+)
+
+print("Loading tokenizer...")
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
+print("Attaching LoRA adapter...")
+model = PeftModel.from_pretrained(base_model, adapter_dir)
+model.eval()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

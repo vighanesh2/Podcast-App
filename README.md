@@ -1,4 +1,4 @@
-# Humorous Podcast Database
+# NapCast Podcast Database
 
 A comprehensive MongoDB database designed for a humorous podcast application that converts user prompts and ideas into entertaining podcast content.
 
