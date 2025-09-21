@@ -31,17 +31,21 @@ export default function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const authStatus = await authService.isAuthenticated();
+      // Temporarily skip authentication for development
+      // const authStatus = await authService.isAuthenticated();
       
-      if (authStatus.isAuthenticated) {
-        setUser(authStatus.user);
-        setCurrentScreen('main'); // Show main app with home screen
-      } else {
-        setCurrentScreen('home'); // Show landing page
-      }
+      // if (authStatus.isAuthenticated) {
+      //   setUser(authStatus.user);
+      //   setCurrentScreen('main'); // Show main app with home screen
+      // } else {
+      //   setCurrentScreen('home'); // Show landing page
+      // }
+      
+      // Skip auth for now - go directly to main app
+      setCurrentScreen('main');
     } catch (error) {
       console.error('Auth check error:', error);
-      setCurrentScreen('home');
+      setCurrentScreen('main'); // Go to main instead of home
     } finally {
       setLoading(false);
     }
