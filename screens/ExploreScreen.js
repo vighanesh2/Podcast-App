@@ -14,8 +14,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
+
 const ExploreScreen = ({ navigation }) => {
   const [description, setDescription] = useState('');
+  const [responseText, setResponseText] = useState('');
+
+    // Define this function somewhere in your component
+  const triggerNgrokEndpoint = async () => {
+    try {
+      const response = await fetch("https://2bb99058b311.ngrok-free.app/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: description }),
+      });
+      console.log(description);
+      const data = await response.json();
+      console.log("Response from endpoint:", data);
+
+      // Update state to display response
+      setResponseText(data.response || JSON.stringify(data));
+    } catch (error) {
+      console.error("Error calling endpoint:", error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,18 +70,21 @@ const ExploreScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Input Field */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputField}
-            placeholder="Describe it you sleepy head..."
-            placeholderTextColor="#999"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            textAlignVertical="top"
-          />
-          <TouchableOpacity style={styles.playButton}>
+        {/* Input Field + Button */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Describe it you sleepy head..."
+              placeholderTextColor="#999"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              textAlignVertical="top"
+            />
+            <TouchableOpacity
+              style={styles.playButton}
+              onPress={triggerNgrokEndpoint}
+            >
             <Text style={styles.playButtonText}>▶</Text>
           </TouchableOpacity>
         </View>
