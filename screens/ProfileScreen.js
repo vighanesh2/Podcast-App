@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  SafeAreaView,
   StatusBar,
   Platform,
   ActivityIndicator,
   Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authService } from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
@@ -101,38 +101,35 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
+      <View style={styles.topPadding} />
       
       
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Sno</Text>
-          <Image 
-            source={require('../assets/sleeping.png')} 
-            style={styles.logoIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.logoText}>Cast</Text>
-        </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity 
-            style={styles.signoutButton}
-            onPress={handleSignOut}
-          >
-            <Text style={styles.signoutText}>Sign Out</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsButton}>
+      {/* Main Content Container */}
+      <View style={styles.mainContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoText}>Nap</Text>
             <Image 
-              source={require('../assets/settings.png')} 
-              style={styles.settingsIcon}
+              source={require('../assets/sleeping.png')} 
+              style={styles.logoIcon}
               resizeMode="contain"
             />
-          </TouchableOpacity>
+            <Text style={styles.logoText}>Cast</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.settingsButton}>
+              <Image 
+                source={require('../assets/settings.png')} 
+                style={styles.settingsIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      {/* Profile Section */}
-      <View style={styles.profileSection}>
+        {/* Profile Section */}
+        <View style={styles.profileSection}>
         <View style={styles.profileCard}>
           <Image 
             source={{ uri: user?.profileImage || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face' }} 
@@ -153,8 +150,16 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </View>
         </View>
+        
+        {/* Sign Out Button */}
+        <TouchableOpacity 
+          style={styles.signoutButton}
+          onPress={handleSignOut}
+        >
+          <Text style={styles.signoutText}>Sign Out</Text>
+        </TouchableOpacity>
+        </View>
       </View>
-
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
@@ -206,6 +211,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
+  topPadding: {
+    height: Platform.OS === 'android' ? 24 : 0,
+  },
+  mainContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -246,15 +258,22 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   signoutButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
     backgroundColor: '#ff4444',
-    borderRadius: 20,
+    borderRadius: 25,
+    marginTop: 24,
+    shadowColor: '#ff4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   signoutText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
   settingsButton: {
     width: 40,
@@ -335,36 +354,24 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     position: 'absolute',
     bottom: 0,
-    left: 20,
-    right: 20,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    borderRadius: 30,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    marginBottom: 20,
-    // Advanced glass effect with modern purple and white mix
-    backgroundColor: 'rgba(139, 69, 255, 0.12)',
-    // Glass filter simulation with multiple layers
-    shadowColor: '#8B45FF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 15,
-    // Glass borders with modern purple and white highlight
-    borderWidth: 1,
-    borderColor: 'rgba(139, 69, 255, 0.25)',
-    // Specular highlight effect with white
-    borderTopWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.6)',
-    // Glass overlay effect with mixed colors
-    borderLeftWidth: 0.5,
-    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
-    borderRightWidth: 0.5,
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    // Professional Android-style design
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    // Clean border
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
     // Ensure navigation is above other elements
     zIndex: 10,
-    // Glass distortion simulation
-    transform: [{ perspective: 1000 }],
   },
   navItem: {
     flex: 1,

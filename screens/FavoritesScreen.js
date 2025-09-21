@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  SafeAreaView,
   StatusBar,
   FlatList,
   Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -79,14 +79,17 @@ const FavoritesScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
+      <View style={styles.topPadding} />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Saved Podcasts</Text>
-      </View>
+      {/* Main Content Container */}
+      <View style={styles.mainContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Saved Podcasts</Text>
+        </View>
 
-      {/* Content */}
-      <View style={styles.content}>
+        {/* Content */}
+        <View style={styles.content}>
         <FlatList
           data={savedPodcasts}
           renderItem={renderPodcastItem}
@@ -94,6 +97,7 @@ const FavoritesScreen = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.podcastList}
         />
+        </View>
       </View>
 
       {/* Bottom Navigation */}
@@ -145,6 +149,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
+  },
+  topPadding: {
+    height: Platform.OS === 'android' ? 24 : 0,
+  },
+  mainContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
   header: {
     paddingHorizontal: 20,
@@ -236,34 +247,22 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     position: 'absolute',
     bottom: 0,
-    left: 20,
-    right: 20,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    borderRadius: 30,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    marginBottom: 20,
-    // Advanced glass effect with modern purple and white mix
-    backgroundColor: 'rgba(139, 69, 255, 0.12)',
-    // Glass filter simulation with multiple layers
-    shadowColor: '#8B45FF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 15,
-    // Glass borders with modern purple and white highlight
-    borderWidth: 1,
-    borderColor: 'rgba(139, 69, 255, 0.25)',
-    // Specular highlight effect with white
-    borderTopWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.6)',
-    // Glass overlay effect with mixed colors
-    borderLeftWidth: 0.5,
-    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
-    borderRightWidth: 0.5,
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    // Glass distortion simulation
-    transform: [{ perspective: 1000 }],
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    // Professional Android-style design
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    // Clean border
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   navItem: {
     flex: 1,

@@ -8,16 +8,17 @@ import {
   TextInput,
   Image,
   Dimensions,
-  SafeAreaView,
   StatusBar,
   FlatList,
   Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
 const HomeScreen = ({ user, onSignOut, navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAllNapCasts, setShowAllNapCasts] = useState(false);
 
   // Mock data for podcasts
   const mostViewedData = [
@@ -65,6 +66,55 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
       duration: '60 min',
       thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop',
       description: 'Reflections on time and existence'
+    },
+    {
+      id: '4',
+      title: 'Counting Sheep Variations',
+      duration: '30 min',
+      thumbnail: 'https://images.unsplash.com/photo-1506905925346-14b1e61d0c53?w=300&h=300&fit=crop',
+      description: 'Different methods of counting sheep for better sleep'
+    },
+    {
+      id: '5',
+      title: 'White Noise Patterns',
+      duration: '90 min',
+      thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3ad161dd2be?w=300&h=300&fit=crop',
+      description: 'Various white noise patterns for deep sleep'
+    },
+    {
+      id: '6',
+      title: 'Boring Meeting Minutes',
+      duration: '25 min',
+      thumbnail: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=300&fit=crop',
+      description: 'Reading corporate meeting minutes in monotone'
+    },
+    {
+      id: '7',
+      title: 'Weather Forecast Archive',
+      duration: '40 min',
+      thumbnail: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=300&h=300&fit=crop',
+      description: 'Historical weather data from the past decade'
+    },
+    {
+      id: '8',
+      title: 'Phone Book Directory',
+      duration: '75 min',
+      thumbnail: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop',
+      description: 'Reading through a phone directory alphabetically'
+    },
+    {
+      id: '9',
+      title: 'Tax Code Reading',
+      duration: '120 min',
+      thumbnail: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=300&h=300&fit=crop',
+      description: 'Monotone reading of tax regulations'
+    },
+    {
+      id: '10',
+      title: 'Dictionary Definitions',
+      duration: '50 min',
+      thumbnail: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop',
+      description: 'Reading dictionary definitions from A to Z'
     }
   ];
 
@@ -76,7 +126,7 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
     </TouchableOpacity>
   );
 
-  const renderSnoozeCastItem = ({ item }) => (
+  const renderNapCastItem = ({ item }) => (
     <TouchableOpacity style={styles.snoozeCastItem}>
       <Image source={{ uri: item.thumbnail }} style={styles.snoozeCastThumbnail} />
       <View style={styles.snoozeCastContent}>
@@ -89,15 +139,19 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
     </TouchableOpacity>
   );
 
+  // Determine which NapCasts to show based on showAllNapCasts state
+  const displayedNapCasts = showAllNapCasts ? snoozeCastsData : snoozeCastsData.slice(0, 3);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
+      <View style={styles.topPadding} />
       
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>Sno</Text>
+          <View style={styles.greetingContainer}>
+            <Text style={styles.greetingText}>Hi {user?.name || user?.username || 'there'}!</Text>
             <View style={styles.moonContainer}>
               <Image 
                 source={require('../assets/sleeping.png')} 
@@ -109,7 +163,6 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
                 <Text style={[styles.zText, styles.zText2]}>Z</Text>
               </View>
             </View>
-            <Text style={styles.logoText}>Cast</Text>
           </View>
         </View>
         <View style={styles.headerRight}>
@@ -143,9 +196,13 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
           </View>
         </View>
 
-        {/* Most Viewed Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Yours Most Viewed</Text>
+        {/* Main Content Container */}
+        <View style={styles.content}>
+          {/* Most Viewed Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Yours Most Viewed</Text>
+            </View>
           <FlatList
             data={mostViewedData}
             renderItem={renderMostViewedItem}
@@ -159,18 +216,21 @@ const HomeScreen = ({ user, onSignOut, navigation }) => {
         {/* Created SnoozeCasts Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Created SnoozeCasts</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeMoreText}>See more</Text>
+            <Text style={styles.sectionTitle}>Created NapCasts</Text>
+            <TouchableOpacity onPress={() => setShowAllNapCasts(!showAllNapCasts)}>
+              <Text style={styles.seeMoreText}>
+                {showAllNapCasts ? 'Show less' : 'See more'}
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.snoozeCastsList}>
-            {snoozeCastsData.map((item) => (
+            {displayedNapCasts.map((item) => (
               <View key={item.id}>
-                {renderSnoozeCastItem({ item })}
+                {renderNapCastItem({ item })}
               </View>
             ))}
           </View>
+        </View>
         </View>
 
         {/* Bottom spacing for navigation */}
@@ -227,6 +287,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
+  topPadding: {
+    height: Platform.OS === 'android' ? 24 : 0,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -242,15 +309,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoContainer: {
+  greetingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoText: {
+  greetingText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#2c2c2c',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     fontFamily: Platform.OS === 'ios' ? 'Amaranth-Regular' : 'Amaranth',
     fontStyle: 'normal',
   },
@@ -432,34 +499,22 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     position: 'absolute',
     bottom: 0,
-    left: 20,
-    right: 20,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    borderRadius: 30,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    marginBottom: 20,
-    // Advanced glass effect with modern purple and white mix
-    backgroundColor: 'rgba(139, 69, 255, 0.12)',
-    // Glass filter simulation with multiple layers
-    shadowColor: '#8B45FF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 15,
-    // Glass borders with modern purple and white highlight
-    borderWidth: 1,
-    borderColor: 'rgba(139, 69, 255, 0.25)',
-    // Specular highlight effect with white
-    borderTopWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.6)',
-    // Glass overlay effect with mixed colors
-    borderLeftWidth: 0.5,
-    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
-    borderRightWidth: 0.5,
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    // Glass distortion simulation
-    transform: [{ perspective: 1000 }],
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    // Professional Android-style design
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    // Clean border
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   navItem: {
     flex: 1,

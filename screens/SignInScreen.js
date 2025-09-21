@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authService } from '../services/authService';
 
 const SignInScreen = ({ navigation, onAuthSuccess }) => {
@@ -30,7 +31,7 @@ const SignInScreen = ({ navigation, onAuthSuccess }) => {
       const result = await authService.signin({ email, password });
       
       if (result.success) {
-        Alert.alert('Success', 'Welcome back to Sno Cast!');
+        Alert.alert('Success', 'Welcome back to Nap Cast!');
         // Call the success callback to notify parent component
         if (onAuthSuccess) {
           onAuthSuccess(result.user);
@@ -46,10 +47,18 @@ const SignInScreen = ({ navigation, onAuthSuccess }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation?.navigate('landing')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome Back</Text>
@@ -96,13 +105,14 @@ const SignInScreen = ({ navigation, onAuthSuccess }) => {
 
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <TouchableOpacity onPress={() => navigation.navigate('signup')}>
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -110,6 +120,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -119,6 +132,21 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 20 : 50,
+    left: 20,
+    zIndex: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
   title: {
     fontSize: 32,

@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authService } from '../services/authService';
 
 const SignUpScreen = ({ navigation, onAuthSuccess }) => {
@@ -63,7 +64,7 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
       const result = await authService.signup(signupData);
       
       if (result.success) {
-        Alert.alert('Success', 'Account created successfully! Welcome to Sno Cast!');
+        Alert.alert('Success', 'Account created successfully! Welcome to Nap Cast!');
         // Call the success callback to notify parent component
         if (onAuthSuccess) {
           onAuthSuccess(result.user);
@@ -80,13 +81,21 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation?.navigate('landing')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <Text style={styles.title}>Join Sno Cast</Text>
+          <Text style={styles.title}>Join Nap Cast</Text>
           <Text style={styles.subtitle}>Create your account to start sleeping better</Text>
         </View>
 
@@ -159,7 +168,8 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -167,6 +177,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -176,6 +189,21 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 20 : 50,
+    left: 20,
+    zIndex: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
   title: {
     fontSize: 32,

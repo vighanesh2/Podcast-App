@@ -7,9 +7,9 @@ import {
   TouchableOpacity, 
   Image,
   Dimensions,
-  SafeAreaView,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { authService } from './services/authService';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
@@ -72,78 +72,93 @@ export default function App() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="dark" />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#6b46c1" />
-          <Text style={styles.loadingText}>Loading Sno Cast...</Text>
-        </View>
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container}>
+          <StatusBar style="dark" />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#6b46c1" />
+            <Text style={styles.loadingText}>Loading Nap Cast...</Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'signin') {
     return (
-      <SignInScreen 
-        navigation={{ navigate: setCurrentScreen }}
-        onAuthSuccess={handleAuthSuccess}
-        onBack={handleBackToHome}
-      />
+      <SafeAreaProvider>
+        <SignInScreen 
+          navigation={{ navigate: setCurrentScreen }}
+          onAuthSuccess={handleAuthSuccess}
+          onBack={handleBackToHome}
+        />
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'signup') {
     return (
-      <SignUpScreen 
-        navigation={{ navigate: setCurrentScreen }}
-        onAuthSuccess={handleAuthSuccess}
-        onBack={handleBackToHome}
-      />
+      <SafeAreaProvider>
+        <SignUpScreen 
+          navigation={{ navigate: setCurrentScreen }}
+          onAuthSuccess={handleAuthSuccess}
+          onBack={handleBackToHome}
+        />
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'main') {
     return (
-      <HomeScreen 
-        user={user}
-        onSignOut={handleSignOut}
-        navigation={{ navigate: setCurrentScreen }}
-      />
+      <SafeAreaProvider>
+        <HomeScreen 
+          user={user}
+          onSignOut={handleSignOut}
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'explore') {
     return (
-      <ExploreScreen 
-        navigation={{ navigate: setCurrentScreen }}
-      />
+      <SafeAreaProvider>
+        <ExploreScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'favorites') {
     return (
-      <FavoritesScreen 
-        navigation={{ navigate: setCurrentScreen }}
-      />
+      <SafeAreaProvider>
+        <FavoritesScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
     );
   }
 
   if (currentScreen === 'profile') {
     return (
-      <ProfileScreen 
-        navigation={{ navigate: setCurrentScreen }}
-      />
+      <SafeAreaProvider>
+        <ProfileScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
       
       {/* Logo Section */}
       <View style={styles.logoContainer}>
         <View style={styles.logoRow}>
-          <Text style={styles.logoText}>Sno</Text>
+          <Text style={styles.logoText}>Nap</Text>
           <View style={styles.moonContainer}>
             <Image 
               source={require('./assets/sleeping.png')} 
@@ -210,6 +225,7 @@ export default function App() {
         )}
       </View>
     </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
