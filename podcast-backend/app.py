@@ -7,6 +7,7 @@ from routes.auth import auth_bp
 from routes.user_prompts import user_prompts_bp
 from routes.podcast_episodes import podcast_episodes_bp
 from routes.voice_generation_jobs import voice_jobs_bp
+from routes.voice_generation import voice_generation_bp
 from routes.rss_feeds import rss_feeds_bp
 from routes.analytics import analytics_bp
 from routes.content_templates import content_templates_bp
@@ -36,6 +37,7 @@ app.register_blueprint(auth_bp, url_prefix='/api/users')
 app.register_blueprint(user_prompts_bp, url_prefix='/api/user-prompts')
 app.register_blueprint(podcast_episodes_bp, url_prefix='/api/podcast-episodes')
 app.register_blueprint(voice_jobs_bp, url_prefix='/api/voice-generation-jobs')
+app.register_blueprint(voice_generation_bp, url_prefix='/api/voice-generation')
 app.register_blueprint(rss_feeds_bp, url_prefix='/api/rss-feeds')
 app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 app.register_blueprint(content_templates_bp, url_prefix='/api/content-templates')

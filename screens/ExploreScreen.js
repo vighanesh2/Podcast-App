@@ -20,8 +20,42 @@ const ExploreScreen = ({ navigation }) => {
   const [description, setDescription] = useState('');
   const [responseText, setResponseText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
 
-    // Define this function somewhere in your component
+  // Function to generate audio from text
+  const generateAudio = async (text) => {
+    try {
+      setIsGeneratingAudio(true);
+      const response = await fetch("https://dd70d0b87321.ngrok-free.app/api/voice-generation/generate-audio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          text: text,
+          voice_mode: 0, // Sleepy voice for NapCasts
+          filename: `napcast_${Date.now()}`
+        }),
+      });
+      
+      const data = await response.json();
+      console.log("Audio generation response:", data);
+      
+      if (data.status === 'success') {
+        setAudioUrl(data.audio_path);
+        return data.audio_path;
+      } else {
+        console.error("Audio generation failed:", data.message);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error generating audio:", error);
+      return null;
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
+
+  // Define this function somewhere in your component
   const triggerNgrokEndpoint = async () => {
     if (isLoading) return; // Prevent multiple calls
     
@@ -37,7 +71,11 @@ const ExploreScreen = ({ navigation }) => {
       console.log("Response from endpoint:", data);
 
       // Update state to display response
-      setResponseText(data.response || JSON.stringify(data));
+      const responseText = data.response || JSON.stringify(data);
+      setResponseText(responseText);
+      
+      // Generate audio from the response text
+      await generateAudio(responseText);
     } catch (error) {
       console.error("Error calling endpoint:", error);
     } finally {
@@ -105,6 +143,31 @@ const ExploreScreen = ({ navigation }) => {
         {isLoading && (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Creating your NapCast...</Text>
+          </View>
+        )}
+        
+        {/* Audio generation indicator */}
+        {isGeneratingAudio && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Generating audio...</Text>
+          </View>
+        )}
+        
+        {/* Response text display */}
+        {responseText && (
+          <View style={styles.responseContainer}>
+            <Text style={styles.responseTitle}>Your NapCast Script:</Text>
+            <Text style={styles.responseText}>{responseText}</Text>
+          </View>
+        )}
+        
+        {/* Audio player */}
+        {audioUrl && (
+          <View style={styles.audioContainer}>
+            <Text style={styles.audioTitle}>🎵 Your NapCast is ready!</Text>
+            <TouchableOpacity style={styles.playAudioButton}>
+              <Text style={styles.playAudioButtonText}>▶ Play NapCast</Text>
+            </TouchableOpacity>
           </View>
         )}
         </View>
@@ -281,6 +344,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontStyle: 'italic',
+  },
+  responseContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    width: '100%',
+  },
+  responseTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4C0099',
+    marginBottom: 10,
+  },
+  responseText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+  audioContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#e8f5e8',
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
+  },
+  audioTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d5a2d',
+    marginBottom: 10,
+  },
+  playAudioButton: {
+    backgroundColor: '#4C0099',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  playAudioButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   bottomNavigation: {
     position: 'absolute',
