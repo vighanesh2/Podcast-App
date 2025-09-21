@@ -1,27 +1,23 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const SimpleUser = require('../models/SimpleUser');
-const { generateToken, authenticateToken } = require('../middleware/auth');
+const UserTotal = require('../models/UserTotal');
 
 const router = express.Router();
 
 // Validation rules
 const signupValidation = [
-  body('username')
-    .isLength({ min: 3, max: 20 })
-    .withMessage('Username must be between 3 and 20 characters')
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage('Username can only contain letters, numbers, and underscores'),
+  body('name')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters')
+    .trim(),
   body('email')
     .isEmail()
     .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number')
+    .notEmpty()
+    .withMessage('Password is required')
 ];
 
 const signinValidation = [
@@ -49,42 +45,46 @@ router.post('/signup', signupValidation, async (req, res) => {
       });
     }
 
-    const { username, email, password, firstName, lastName } = req.body;
+    const { name, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await SimpleUser.findOne({
-      $or: [{ email }, { username }]
-    });
+    const existingUser = await UserTotal.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: existingUser.email === email 
-          ? 'Email already registered' 
-          : 'Username already taken'
+        message: 'Email already registered'
       });
     }
 
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     // Create new user
-    const user = new SimpleUser({
-      username,
+    const user = new UserTotal({
+      name,
       email,
-      password,
-      firstName: firstName || '',
-      lastName: lastName || ''
+      password: hashedPassword,
+      minutesListened: 0,
+      podcastsCreated: 0
     });
 
     await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
-        user: user.toJSON(),
-        token
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          profileImage: user.profileImage,
+          minutesListened: user.minutesListened,
+          podcastsCreated: user.podcastsCreated,
+          createdAt: user.createdAt
+        }
       }
     });
 
@@ -98,7 +98,7 @@ router.post('/signup', signupValidation, async (req, res) => {
 });
 
 // @route   POST /api/auth/signin
-// @desc    Authenticate user and get token
+// @desc    Authenticate user
 // @access  Public
 router.post('/signin', signinValidation, async (req, res) => {
   try {
@@ -115,7 +115,7 @@ router.post('/signin', signinValidation, async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
-    const user = await SimpleUser.findOne({ email });
+    const user = await UserTotal.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -124,7 +124,7 @@ router.post('/signin', signinValidation, async (req, res) => {
     }
 
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -132,19 +132,19 @@ router.post('/signin', signinValidation, async (req, res) => {
       });
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
-
     res.json({
       success: true,
       message: 'Login successful',
       data: {
-        user: user.toJSON(),
-        token
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          profileImage: user.profileImage,
+          minutesListened: user.minutesListened,
+          podcastsCreated: user.podcastsCreated,
+          createdAt: user.createdAt
+        }
       }
     });
 
@@ -157,39 +157,53 @@ router.post('/signin', signinValidation, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Logout user (client-side token removal)
-// @access  Private
-router.post('/logout', authenticateToken, async (req, res) => {
-  try {
-    // In a more sophisticated setup, you might want to blacklist the token
-    // For now, we'll just return success as token removal is handled client-side
-    
-    res.json({
-      success: true,
-      message: 'Logout successful'
-    });
-
-  } catch (error) {
-    console.error('Logout error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during logout'
-    });
-  }
-});
-
 // @route   GET /api/auth/me
 // @desc    Get current user profile
-// @access  Private
-router.get('/me', authenticateToken, async (req, res) => {
+// @access  Public (simple password-based auth)
+router.get('/me', async (req, res) => {
   try {
+    const { email, password } = req.query;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password required'
+      });
+    }
+
+    // Find user by email
+    const user = await UserTotal.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password'
+      });
+    }
+
     res.json({
       success: true,
       data: {
-        user: req.user
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          profileImage: user.profileImage,
+          minutesListened: user.minutesListened,
+          podcastsCreated: user.podcastsCreated,
+          createdAt: user.createdAt
+        }
       }
     });
+
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({
@@ -199,25 +213,69 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/refresh
-// @desc    Refresh JWT token
-// @access  Private
-router.post('/refresh', authenticateToken, async (req, res) => {
+// @route   PUT /api/auth/update-stats
+// @desc    Update user stats
+// @access  Public (simple password-based auth)
+router.put('/update-stats', async (req, res) => {
   try {
-    const newToken = generateToken(req.user._id);
-    
+    const { email, password, minutesListened, podcastsCreated } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password required'
+      });
+    }
+
+    // Find user by email
+    const user = await UserTotal.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password'
+      });
+    }
+
+    // Update stats
+    if (minutesListened !== undefined) {
+      user.minutesListened = minutesListened;
+    }
+    if (podcastsCreated !== undefined) {
+      user.podcastsCreated = podcastsCreated;
+    }
+
+    await user.save();
+
     res.json({
       success: true,
-      message: 'Token refreshed successfully',
+      message: 'Stats updated successfully',
       data: {
-        token: newToken
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          profileImage: user.profileImage,
+          minutesListened: user.minutesListened,
+          podcastsCreated: user.podcastsCreated,
+          createdAt: user.createdAt
+        }
       }
     });
+
   } catch (error) {
-    console.error('Token refresh error:', error);
+    console.error('Update stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error refreshing token'
+      message: 'Server error updating stats'
     });
   }
 });

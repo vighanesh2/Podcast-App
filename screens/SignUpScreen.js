@@ -15,12 +15,10 @@ import { authService } from '../services/authService';
 
 const SignUpScreen = ({ navigation, onAuthSuccess }) => {
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -32,9 +30,9 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
   };
 
   const validateForm = () => {
-    const { username, email, password, confirmPassword } = formData;
+    const { name, email, password, confirmPassword } = formData;
     
-    if (!username || !email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all required fields');
       return false;
     }
@@ -51,22 +49,6 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
       return false;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
-      return false;
-    }
-
-    // Password complexity validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-    if (!passwordRegex.test(password)) {
-      Alert.alert('Error', 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
-      return false;
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      Alert.alert('Error', 'Username can only contain letters, numbers, and underscores');
-      return false;
-    }
 
     return true;
   };
@@ -109,38 +91,14 @@ const SignUpScreen = ({ navigation, onAuthSuccess }) => {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.row}>
-            <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>First Name</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.firstName}
-                onChangeText={(value) => handleInputChange('firstName', value)}
-                placeholder="First name"
-                autoCapitalize="words"
-              />
-            </View>
-            <View style={[styles.inputContainer, { flex: 1, marginLeft: 10 }]}>
-              <Text style={styles.label}>Last Name</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.lastName}
-                onChangeText={(value) => handleInputChange('lastName', value)}
-                placeholder="Last name"
-                autoCapitalize="words"
-              />
-            </View>
-          </View>
-
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Username *</Text>
+            <Text style={styles.label}>Full Name *</Text>
             <TextInput
               style={styles.input}
-              value={formData.username}
-              onChangeText={(value) => handleInputChange('username', value)}
-              placeholder="Choose a username"
-              autoCapitalize="none"
-              autoCorrect={false}
+              value={formData.name}
+              onChangeText={(value) => handleInputChange('name', value)}
+              placeholder="Enter your full name"
+              autoCapitalize="words"
             />
           </View>
 

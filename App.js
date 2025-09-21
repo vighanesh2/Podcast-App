@@ -15,11 +15,13 @@ import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import HomeScreen from './screens/HomeScreen';
 import ExploreScreen from './screens/ExploreScreen';
+import FavoritesScreen from './screens/FavoritesScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 const { width, height } = Dimensions.get('window');
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('loading'); // 'loading', 'home', 'signin', 'signup', 'explore'
+  const [currentScreen, setCurrentScreen] = useState('loading'); // 'loading', 'home', 'signin', 'signup', 'explore', 'favorites', 'profile'
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -113,6 +115,22 @@ export default function App() {
   if (currentScreen === 'explore') {
     return (
       <ExploreScreen 
+        navigation={{ navigate: setCurrentScreen }}
+      />
+    );
+  }
+
+  if (currentScreen === 'favorites') {
+    return (
+      <FavoritesScreen 
+        navigation={{ navigate: setCurrentScreen }}
+      />
+    );
+  }
+
+  if (currentScreen === 'profile') {
+    return (
+      <ProfileScreen 
         navigation={{ navigate: setCurrentScreen }}
       />
     );

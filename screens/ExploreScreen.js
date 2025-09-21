@@ -83,14 +83,20 @@ const ExploreScreen = ({ navigation }) => {
           />
           <View style={styles.activeIndicator} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation?.navigate('favorites')}
+        >
           <Image 
             source={require('../assets/heart-fill.png')} 
             style={[styles.navIconImage, { tintColor: '#666' }]}
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation?.navigate('profile')}
+        >
           <Image 
             source={require('../assets/Group 152.png')} 
             style={[styles.navIconImage, { tintColor: '#666' }]}
@@ -215,23 +221,31 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     flexDirection: 'row',
-    backgroundColor: 'rgba(76, 0, 153, 0.15)',
     borderRadius: 30,
     paddingVertical: 16,
     paddingHorizontal: 24,
     marginBottom: 20,
-    // Clean glass effect
-    shadowColor: '#4C0099',
+    // Advanced glass effect with modern purple and white mix
+    backgroundColor: 'rgba(139, 69, 255, 0.12)',
+    // Glass filter simulation with multiple layers
+    shadowColor: '#8B45FF',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.18,
     shadowRadius: 20,
     elevation: 15,
-    // Clean glass border
+    // Glass borders with modern purple and white highlight
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    // Subtle glass highlight
-    borderTopWidth: 0.5,
+    borderColor: 'rgba(139, 69, 255, 0.25)',
+    // Specular highlight effect with white
+    borderTopWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.6)',
+    // Glass overlay effect with mixed colors
+    borderLeftWidth: 0.5,
+    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
+    borderRightWidth: 0.5,
+    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    // Glass distortion simulation
+    transform: [{ perspective: 1000 }],
   },
   navItem: {
     flex: 1,
