@@ -1,4 +1,5 @@
 import nltk
+# nltk.download('wordnet')
 from nltk.corpus import wordnet
 import random
 
@@ -11,6 +12,7 @@ def getAnt(word):
     if(len(antonyms) > 0):
         return antonyms[random.randint(0,len(antonyms)-1)]
     return word
+
 
 def getSyn(word):
     synonyms = []

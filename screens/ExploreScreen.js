@@ -27,7 +27,7 @@ const ExploreScreen = ({ navigation }) => {
   const generateAudio = async (text) => {
     try {
       setIsGeneratingAudio(true);
-      const response = await fetch("https://dd70d0b87321.ngrok-free.app/api/voice-generation/generate-audio", {
+      const response = await fetch("http://10.50.18.72:5000/api/voice-generation/generate-audio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -37,12 +37,26 @@ const ExploreScreen = ({ navigation }) => {
         }),
       });
       
-      const data = await response.json();
-      console.log("Audio generation response:", data);
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+      console.log("Response status:", response.status);
       
-      if (data.status === 'success') {
-        setAudioUrl(data.audio_path);
-        return data.audio_path;
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log("Parsed JSON response:", data);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        console.error("Response was not JSON:", responseText);
+        throw new Error(`Server returned non-JSON response: ${responseText.substring(0, 100)}...`);
+      }
+      
+      if (data.success) {
+        // Construct the full URL for the audio file
+        const audioUrl = `http://10.50.18.72:5000/api/voice-generation/audio/${data.data.filename}`;
+        setAudioUrl(audioUrl);
+        return audioUrl;
       } else {
         console.error("Audio generation failed:", data.message);
         return null;

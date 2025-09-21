@@ -3,10 +3,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const path = require('path');
+
+// Load environment variables from project root .env file
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const voiceRoutes = require('./routes/voice');
 
 const app = express();
 
@@ -41,6 +45,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sno-cast'
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/voice-generation', voiceRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -71,7 +76,8 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Sno Cast server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Server accessible at: http://0.0.0.0:${PORT}`);
 });
