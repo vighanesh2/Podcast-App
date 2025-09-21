@@ -22,7 +22,7 @@ const ExploreScreen = ({ navigation }) => {
     // Define this function somewhere in your component
   const triggerNgrokEndpoint = async () => {
     try {
-      const response = await fetch("https://2bb99058b311.ngrok-free.app/generate", {
+      const response = await fetch("https://dd70d0b87321.ngrok-free.app/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: description }),
