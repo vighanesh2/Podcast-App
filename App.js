@@ -1,268 +1,417 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { 
   StyleSheet, 
   Text, 
   View, 
-  ScrollView, 
   TouchableOpacity, 
-  Image, 
+  Image,
   Dimensions,
-  SafeAreaView
+  ActivityIndicator
 } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { authService } from './services/authService';
+import SignInScreen from './screens/SignInScreen';
+import SignUpScreen from './screens/SignUpScreen';
+import HomeScreen from './screens/HomeScreen';
+import ExploreScreen from './screens/ExploreScreen';
+import FavoritesScreen from './screens/FavoritesScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function App() {
-  const [currentPodcast, setCurrentPodcast] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState('loading'); // 'loading', 'home', 'signin', 'signup', 'explore', 'favorites', 'profile'
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const podcasts = [
-    {
-      id: 1,
-      title: "The Daily Tech",
-      host: "Sarah Johnson",
-      duration: "45 min",
-      image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=300&h=300&fit=crop&crop=center",
-      category: "Technology"
-    },
-    {
-      id: 2,
-      title: "Mindful Living",
-      host: "Dr. Michael Chen",
-      duration: "32 min",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=center",
-      category: "Wellness"
-    },
-    {
-      id: 3,
-      title: "Business Insights",
-      host: "Emma Rodriguez",
-      duration: "28 min",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=300&h=300&fit=crop&crop=center",
-      category: "Business"
-    },
-    {
-      id: 4,
-      title: "Creative Stories",
-      host: "Alex Thompson",
-      duration: "38 min",
-      image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop&crop=center",
-      category: "Arts"
-    }
-  ];
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
 
-  const togglePlayPause = (podcast) => {
-    if (currentPodcast?.id === podcast.id) {
-      setIsPlaying(!isPlaying);
-    } else {
-      setCurrentPodcast(podcast);
-      setIsPlaying(true);
+  const checkAuthStatus = async () => {
+    try {
+      const authStatus = await authService.isAuthenticated();
+      
+      if (authStatus.isAuthenticated) {
+        setUser(authStatus.user);
+        setCurrentScreen('main'); // Show main app with home screen
+      } else {
+        setCurrentScreen('home'); // Show landing page
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setCurrentScreen('home');
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Podcast App</Text>
-        <Text style={styles.headerSubtitle}>Discover amazing stories</Text>
-      </View>
+  const handleSignIn = () => {
+    setCurrentScreen('signin');
+  };
 
-      {/* Now Playing Section */}
-      {currentPodcast && (
-        <View style={styles.nowPlaying}>
-          <View style={styles.nowPlayingContent}>
-            <Image 
-              source={{ uri: currentPodcast.image }} 
-              style={styles.nowPlayingImage}
-            />
-            <View style={styles.nowPlayingInfo}>
-              <Text style={styles.nowPlayingTitle}>{currentPodcast.title}</Text>
-              <Text style={styles.nowPlayingHost}>{currentPodcast.host}</Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.playButton}
-              onPress={() => setIsPlaying(!isPlaying)}
-            >
-              <Text style={styles.playButtonText}>
-                {isPlaying ? '⏸️' : '▶️'}
-              </Text>
-            </TouchableOpacity>
+  const handleSignUp = () => {
+    setCurrentScreen('signup');
+  };
+
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setCurrentScreen('main');
+  };
+
+  const handleSignOut = async () => {
+    await authService.signout();
+    setUser(null);
+    setCurrentScreen('home');
+  };
+
+  const handleBackToHome = () => {
+    setCurrentScreen('home');
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container}>
+          <StatusBar style="dark" />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#6b46c1" />
+            <Text style={styles.loadingText}>Loading Nap Cast...</Text>
           </View>
-        </View>
-      )}
+        </SafeAreaView>
+      </SafeAreaProvider>
+    );
+  }
 
-      {/* Featured Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Featured Podcasts</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {podcasts.map((podcast) => (
-            <TouchableOpacity 
-              key={podcast.id} 
-              style={styles.podcastCard}
-              onPress={() => togglePlayPause(podcast)}
-            >
-              <Image source={{ uri: podcast.image }} style={styles.podcastImage} />
-              <View style={styles.podcastInfo}>
-                <Text style={styles.podcastTitle}>{podcast.title}</Text>
-                <Text style={styles.podcastHost}>{podcast.host}</Text>
-                <Text style={styles.podcastDuration}>{podcast.duration}</Text>
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryText}>{podcast.category}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+  if (currentScreen === 'signin') {
+    return (
+      <SafeAreaProvider>
+        <SignInScreen 
+          navigation={{ navigate: setCurrentScreen }}
+          onAuthSuccess={handleAuthSuccess}
+          onBack={handleBackToHome}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'signup') {
+    return (
+      <SafeAreaProvider>
+        <SignUpScreen 
+          navigation={{ navigate: setCurrentScreen }}
+          onAuthSuccess={handleAuthSuccess}
+          onBack={handleBackToHome}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'main') {
+    return (
+      <SafeAreaProvider>
+        <HomeScreen 
+          user={user}
+          onSignOut={handleSignOut}
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'explore') {
+    return (
+      <SafeAreaProvider>
+        <ExploreScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'favorites') {
+    return (
+      <SafeAreaProvider>
+        <FavoritesScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'profile') {
+    return (
+      <SafeAreaProvider>
+        <ProfileScreen 
+          navigation={{ navigate: setCurrentScreen }}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+      
+      {/* Logo Section */}
+      <View style={styles.logoContainer}>
+        <View style={styles.logoRow}>
+          <Text style={styles.logoText}>Nap</Text>
+          <View style={styles.moonContainer}>
+            <Image 
+              source={require('./assets/sleeping.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <View style={styles.zLetters}>
+              <Text style={styles.zText}>Z</Text>
+              <Text style={[styles.zText, styles.zText2]}>Z</Text>
+            </View>
+          </View>
+          <Text style={styles.logoText}>Cast</Text>
+        </View>
       </View>
 
-      {/* Categories */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Browse by Category</Text>
-        <View style={styles.categoriesGrid}>
-          {['Technology', 'Wellness', 'Business', 'Arts', 'Science', 'Comedy'].map((category) => (
-            <TouchableOpacity key={category} style={styles.categoryCard}>
-              <Text style={styles.categoryCardText}>{category}</Text>
-            </TouchableOpacity>
-          ))}
+      {/* Sleeping Character Illustration */}
+      <View style={styles.illustrationContainer}>
+        <View style={styles.sleepingCharacter}>
+          <Image 
+            source={require('./assets/girl.png')} 
+            style={styles.characterImage}
+            resizeMode="contain"
+          />
         </View>
+        <View style={styles.zzzBackground}>
+          <Text style={[styles.zzzText, styles.zzz1]}>Z</Text>
+          <Text style={[styles.zzzText, styles.zzz2]}>Z</Text>
+          <Text style={[styles.zzzText, styles.zzz3]}>Z</Text>
+          <Text style={[styles.zzzText, styles.zzz4]}>Z</Text>
+          <Text style={[styles.zzzText, styles.zzz5]}>Z</Text>
+        </View>
+      </View>
+
+      {/* Main Headline */}
+      <View style={styles.headlineContainer}>
+        <Text style={styles.mainHeadline}>
+          Listen to your least{'\n'}
+          favorite podcast to{'\n'}
+          sleep on
+        </Text>
+        <Text style={styles.tagline}>
+          We make sure they are boring af
+        </Text>
+      </View>
+
+      {/* Call to Action Buttons */}
+      <View style={styles.buttonContainer}>
+        {user ? (
+          <>
+            <Text style={styles.welcomeText}>Welcome back, {user.username}!</Text>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+              <Text style={styles.signOutButtonText}>Sign Out</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+              <Text style={styles.signInButtonText}>Sign in</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+              <Text style={styles.signUpButtonText}>Sign up</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#f8f8f8',
+    // Gradient background effect
+    background: 'linear-gradient(180deg, #f8f8f8 0%, #f0e6f7 100%)',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#1a1a1a',
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: height * 0.08,
+    marginBottom: height * 0.05,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#888888',
-  },
-  nowPlaying: {
-    backgroundColor: '#1a1a1a',
-    marginHorizontal: 20,
-    marginVertical: 10,
-    borderRadius: 12,
-    padding: 16,
-  },
-  nowPlayingContent: {
+  logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  nowPlayingImage: {
+  logoText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2c2c2c',
+    letterSpacing: 1,
+  },
+  moonContainer: {
+    position: 'relative',
+    marginHorizontal: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoImage: {
     width: 60,
     height: 60,
-    borderRadius: 8,
-    marginRight: 12,
   },
-  nowPlayingInfo: {
-    flex: 1,
+  zLetters: {
+    position: 'absolute',
+    top: -10,
+    left: -5,
   },
-  nowPlayingTitle: {
+  zText: {
+    fontSize: 16,
+    color: '#ffb347',
+    fontWeight: 'bold',
+    position: 'absolute',
+  },
+  zText2: {
+    left: 8,
+    top: 5,
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    marginBottom: height * 0.06,
+    position: 'relative',
+  },
+  sleepingCharacter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  characterImage: {
+    width: 200,
+    height: 200,
+  },
+  zzzBackground: {
+    position: 'absolute',
+    width: width * 0.8,
+    height: height * 0.3,
+    zIndex: 1,
+  },
+  zzzText: {
+    fontSize: 40,
+    color: '#d8b3e8',
+    fontWeight: 'bold',
+    position: 'absolute',
+    opacity: 0.6,
+  },
+  zzz1: {
+    top: 20,
+    left: 30,
+    transform: [{ rotate: '-15deg' }],
+  },
+  zzz2: {
+    top: 60,
+    right: 40,
+    transform: [{ rotate: '10deg' }],
+  },
+  zzz3: {
+    top: 100,
+    left: 60,
+    transform: [{ rotate: '-5deg' }],
+  },
+  zzz4: {
+    top: 140,
+    right: 60,
+    transform: [{ rotate: '20deg' }],
+  },
+  zzz5: {
+    top: 180,
+    left: 40,
+    transform: [{ rotate: '-10deg' }],
+  },
+  headlineContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    marginBottom: height * 0.08,
+  },
+  mainHeadline: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2c2c2c',
+    textAlign: 'center',
+    lineHeight: 36,
+    marginBottom: 16,
+  },
+  tagline: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  buttonContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    marginBottom: height * 0.05,
+  },
+  signInButton: {
+    backgroundColor: '#6b46c1',
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 25,
+    marginBottom: 16,
+    shadowColor: '#6b46c1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  signInButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  signUpButton: {
+    paddingVertical: 12,
+  },
+  signUpButtonText: {
+    color: '#6b46c1',
     fontSize: 16,
     fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 4,
+    textAlign: 'center',
   },
-  nowPlayingHost: {
-    fontSize: 14,
-    color: '#888888',
-  },
-  playButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ff6b6b',
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playButtonText: {
-    fontSize: 20,
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666666',
   },
-  section: {
-    marginVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginHorizontal: 20,
+  welcomeText: {
+    fontSize: 18,
+    color: '#2c2c2c',
     marginBottom: 16,
+    textAlign: 'center',
+    fontWeight: '600',
   },
-  podcastCard: {
-    width: width * 0.6,
-    backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    marginLeft: 20,
-    overflow: 'hidden',
+  signOutButton: {
+    backgroundColor: '#ff6b6b',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    shadowColor: '#ff6b6b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  podcastImage: {
-    width: '100%',
-    height: 120,
-  },
-  podcastInfo: {
-    padding: 16,
-  },
-  podcastTitle: {
+  signOutButtonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  podcastHost: {
-    fontSize: 14,
-    color: '#888888',
-    marginBottom: 8,
-  },
-  podcastDuration: {
-    fontSize: 12,
-    color: '#666666',
-    marginBottom: 8,
-  },
-  categoryBadge: {
-    backgroundColor: '#ff6b6b',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  categoryText: {
-    fontSize: 10,
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 20,
-  },
-  categoryCard: {
-    backgroundColor: '#1a1a1a',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
-    marginRight: 12,
-    marginBottom: 12,
-  },
-  categoryCardText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '500',
+    textAlign: 'center',
   },
 });

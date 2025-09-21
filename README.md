@@ -1,297 +1,225 @@
-# NapCast Podcast Database
+# 🌙 Sno Cast - Sleep Podcast App
 
-A comprehensive MongoDB database designed for a humorous podcast application that converts user prompts and ideas into entertaining podcast content.
+A beautiful sleep-themed podcast app that helps you fall asleep with boring podcasts. Built with React Native and MongoDB.
 
-## 🎯 Overview
+## ✨ Features
 
-This database supports a multi-team podcast application with:
-- **Frontend Team**: User management, content display, and interaction tracking
-- **RSS Feed Team**: Podcast distribution and feed management
-- **Voice Generation Team**: AI-powered audio content creation
-- **Analytics Team**: Performance tracking and user engagement metrics
-
-## 🗄️ Database Structure
-
-### Collections
-
-1. **Users** - User accounts, preferences, and subscription management
-2. **User Prompts** - User-submitted ideas and prompts for podcast content
-3. **Podcast Episodes** - Generated podcast episodes with scripts and audio
-4. **Voice Generation Jobs** - Audio generation tasks and processing status
-5. **RSS Feeds** - Podcast feed configuration and distribution
-6. **Analytics** - User engagement and performance tracking
-7. **Content Templates** - Reusable content templates for different humor styles
-8. **System Configuration** - Application settings and configuration
+- **Beautiful Sleep-Themed UI** - Calming design with custom illustrations
+- **User Authentication** - Secure signup/signin with JWT tokens
+- **MongoDB Database** - Persistent user data and listening history
+- **Sleep Preferences** - Customize your sleep schedule and podcast preferences
+- **Listening History** - Track your sleep podcast sessions
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- MongoDB Compass installed on your desktop
-- MongoDB server running locally or accessible remotely
 
-### Setup Instructions
+- Node.js (v16 or higher)
+- MongoDB (local or MongoDB Atlas)
+- Expo CLI
+- React Native development environment
 
-1. **Create the Database and Collections**
+### Backend Setup
+
+1. **Navigate to backend directory:**
    ```bash
-   # In MongoDB Compass or MongoDB Shell
-   use podcastDB;
-   # Then run the setup script
-   load("mongodb-setup.js");
+   cd backend
    ```
 
-2. **Insert Sample Data**
+2. **Install dependencies:**
    ```bash
-   # Run the sample data script
-   load("sample-data.js");
+   npm install
    ```
 
-3. **Test with Example Queries**
+3. **Set up environment variables:**
    ```bash
-   # Run example queries
-   load("database-queries.js");
+   cp env.example .env
+   ```
+   
+   Edit `.env` file with your configuration:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/sno-cast
+   JWT_SECRET=your-super-secret-jwt-key-here
+   JWT_EXPIRE=7d
+   PORT=5000
+   NODE_ENV=development
+   CLIENT_URL=http://localhost:19006
    ```
 
-## 📊 Key Features
+4. **Start the backend server:**
+   ```bash
+   npm run dev
+   ```
 
-### User Management
-- User profiles with humor style preferences
-- Subscription tiers (Free, Premium, Pro)
-- User statistics and activity tracking
+   The API will be available at `http://localhost:5000`
 
-### Content Creation
-- Prompt processing with AI integration
-- Multi-segment podcast scripts
-- Humor level classification (1-10 scale)
-- Content categorization and tagging
+### Frontend Setup
 
-### Voice Generation
-- Multiple voice providers support (ElevenLabs, Azure, AWS Polly)
-- Voice customization settings
-- Job queue management with priority system
-- Error handling and retry mechanisms
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-### RSS Feed Management
-- Multiple feed support per user
-- Automated publishing schedules
-- Feed statistics and subscriber tracking
-- Custom feed configuration
+2. **Start the Expo development server:**
+   ```bash
+   npm start
+   ```
 
-### Analytics & Insights
-- Comprehensive event tracking
-- User engagement metrics
-- Content performance analysis
-- Geographic and device analytics
+3. **Run on your device:**
+   - Install Expo Go app on your phone
+   - Scan the QR code from the terminal
+   - Or run on simulator: `npm run ios` or `npm run android`
 
-## 🔧 Configuration
+## 🗄️ Database Schema
 
-### Voice Generation Settings
+### User Model
 ```javascript
 {
-  provider: "elevenlabs",
-  voiceId: "sarcastic_male_01",
-  speed: 1.1,
-  pitch: 1.0,
-  emotion: "sarcastic",
-  stability: 0.8,
-  clarity: 0.9
-}
-```
-
-### RSS Feed Configuration
-```javascript
-{
-  title: "Comedy King's Daily Dose",
-  description: "Daily doses of sarcastic humor",
-  language: "en",
-  category: "Comedy",
-  explicit: false,
-  autoPublish: true,
-  schedule: "0 8 * * *" // Daily at 8 AM
-}
-```
-
-## 📈 Analytics Dashboard Queries
-
-### Top Performing Episodes
-```javascript
-db.podcastEpisodes.aggregate([
-  { $match: { status: "published" } },
-  {
-    $addFields: {
-      totalEngagement: {
-        $add: [
-          "$analytics.downloads",
-          "$analytics.plays", 
-          "$analytics.shares",
-          "$analytics.likes"
-        ]
-      }
-    }
-  },
-  { $sort: { totalEngagement: -1 } },
-  { $limit: 10 }
-]);
-```
-
-### User Engagement Trends
-```javascript
-db.analytics.aggregate([
-  {
-    $group: {
-      _id: {
-        year: { $year: "$event.timestamp" },
-        month: { $month: "$event.timestamp" }
-      },
-      totalEvents: { $sum: 1 },
-      uniqueUsers: { $addToSet: "$userId" }
-    }
-  },
-  {
-    $project: {
-      month: "$_id.month",
-      totalEvents: 1,
-      uniqueUserCount: { $size: "$uniqueUsers" }
+  username: String (unique, required)
+  email: String (unique, required)
+  password: String (hashed, required)
+  profile: {
+    firstName: String
+    lastName: String
+    avatar: String
+    sleepPreferences: {
+      preferredSleepTime: String
+      wakeUpTime: String
+      favoritePodcastCategories: [String]
     }
   }
-]);
-```
-
-## 🎭 Humor Styles Supported
-
-- **Sarcastic**: Witty, cutting observations
-- **Witty**: Clever wordplay and smart humor
-- **Absurd**: Surreal, unexpected humor
-- **Observational**: Everyday life observations
-- **Dark**: Edgy, controversial humor
-- **Wholesome**: Clean, family-friendly humor
-
-## 🔍 Content Categories
-
-- **News**: Current events and trending topics
-- **Personal**: Personal experiences and stories
-- **Random**: Spontaneous thoughts and ideas
-- **Trending**: Popular topics and viral content
-- **Comedy**: Pure comedic content
-- **Story**: Narrative-driven content
-- **Observation**: Social and behavioral observations
-
-## 📱 API Integration Examples
-
-### Create New User
-```javascript
-db.users.insertOne({
-  username: "new_user",
-  email: "user@example.com",
-  profile: {
-    displayName: "New User",
-    preferences: {
-      humorStyle: "witty",
-      language: "en",
-      timezone: "UTC"
-    }
-  },
   subscription: {
-    plan: "free"
-  },
-  stats: {
-    totalPrompts: 0,
-    totalEpisodes: 0,
-    favoriteEpisodes: []
-  },
-  createdAt: new Date(),
-  lastActive: new Date()
-});
+    plan: String (free/premium)
+    startDate: Date
+    endDate: Date
+  }
+  listeningHistory: [{
+    podcastId: String
+    podcastTitle: String
+    listenedAt: Date
+    duration: Number
+    completed: Boolean
+  }]
+  isActive: Boolean
+  lastLogin: Date
+}
 ```
 
-### Process User Prompt
-```javascript
-db.userPrompts.insertOne({
-  userId: ObjectId("USER_ID"),
-  prompt: "Why do we park in driveways and drive on parkways?",
-  category: "observation",
-  mood: "witty",
-  context: {
-    tags: ["language", "observation", "wordplay"],
-    source: "web",
-    originalLength: 65
-  },
-  processing: {
-    status: "pending",
-    priority: 5,
-    assignedTo: null
-  },
-  createdAt: new Date()
-});
+## 🔌 API Endpoints
+
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/signin` - Login user
+- `POST /api/auth/logout` - Logout user
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/refresh` - Refresh JWT token
+
+### User Management
+- `GET /api/user/profile` - Get user profile
+- `PUT /api/user/profile` - Update user profile
+- `GET /api/user/listening-history` - Get listening history
+- `POST /api/user/listening-history` - Add to listening history
+- `DELETE /api/user/account` - Deactivate account
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React Native
+- Expo
+- AsyncStorage
+- Axios
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT (jsonwebtoken)
+- bcryptjs
+- express-validator
+
+## 📱 Screens
+
+1. **Landing Page** - Beautiful sleep-themed welcome screen
+2. **Sign In** - User authentication
+3. **Sign Up** - User registration
+4. **Home** - Main app interface (when authenticated)
+
+## 🔐 Security Features
+
+- Password hashing with bcrypt
+- JWT token authentication
+- Input validation and sanitization
+- Rate limiting
+- CORS protection
+- Helmet security headers
+
+## 🎨 Design Features
+
+- Custom sleep-themed illustrations
+- Gradient backgrounds
+- Smooth animations
+- Responsive design
+- Beautiful typography
+- Consistent color scheme
+
+## 📦 Project Structure
+
+```
+sno-cast/
+├── backend/
+│   ├── models/
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   └── user.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── server.js
+│   └── package.json
+├── screens/
+│   ├── SignInScreen.js
+│   └── SignUpScreen.js
+├── services/
+│   ├── api.js
+│   └── authService.js
+├── assets/
+│   ├── girl.png
+│   └── sleeping.png
+├── App.js
+└── package.json
 ```
 
-### Generate Podcast Episode
-```javascript
-db.podcastEpisodes.insertOne({
-  title: "The Driveway Paradox",
-  description: "Exploring the linguistic absurdity of parking terminology",
-  episodeNumber: 1,
-  season: 1,
-  status: "processing",
-  script: {
-    segments: [
-      {
-        type: "intro",
-        content: "Welcome to Witty Observations...",
-        duration: 30,
-        humorLevel: 8
-      }
-    ],
-    totalWords: 150,
-    estimatedDuration: 300
-  },
-  sourcePrompts: [ObjectId("PROMPT_ID")],
-  createdBy: ObjectId("USER_ID"),
-  createdAt: new Date()
-});
-```
+## 🚀 Deployment
 
-## 🛠️ Maintenance
+### Backend (Heroku/Railway/DigitalOcean)
+1. Set up MongoDB Atlas
+2. Configure environment variables
+3. Deploy backend to your preferred platform
 
-### Regular Tasks
-- Monitor voice generation job failures
-- Clean up old analytics data
-- Update RSS feeds
-- Backup user data
+### Frontend (Expo)
+1. Build for production: `expo build`
+2. Submit to app stores or use Expo Go
 
-### Performance Optimization
-- Index monitoring and optimization
-- Query performance analysis
-- Storage usage monitoring
-- Connection pool management
+## 🤝 Contributing
 
-## 📚 Additional Resources
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [MongoDB Compass Guide](https://docs.mongodb.com/compass/)
-- [Aggregation Pipeline Guide](https://docs.mongodb.com/manual/core/aggregation-pipeline/)
+## 📄 License
 
-## 🤝 Team Integration
+MIT License - see LICENSE file for details
 
-### Frontend Team
-- User authentication and profile management
-- Content display and interaction
-- Real-time analytics dashboard
+## 🆘 Support
 
-### RSS Feed Team
-- Feed generation and validation
-- Distribution management
-- Subscriber analytics
+If you encounter any issues:
+1. Check the console for error messages
+2. Ensure MongoDB is running
+3. Verify environment variables are set correctly
+4. Check network connectivity
 
-### Voice Generation Team
-- Audio processing pipeline
-- Voice quality optimization
-- Job queue management
+---
 
-### Analytics Team
-- Performance metrics collection
-- User behavior analysis
-- Content optimization insights
-
-## 📞 Support
-
-For questions about the database design or implementation, refer to the schema documentation in `database-schema.md` or the example queries in `database-queries.js`.
+**Sweet dreams! 🌙✨**

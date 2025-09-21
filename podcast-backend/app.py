@@ -50,36 +50,39 @@ def health_check():
         'database': 'connected' if db.command('ping') else 'disconnected'
     })
 
-print("STARTING MODEL STUFF")
+# <<<<<<< HEAD
+# print("STARTING MODEL STUFF")
 
-# Load the Large Language Model (LLM)
+# # Load the Large Language Model (LLM)
 
-model_id = "meta-llama/Meta-Llama-3-8B"
-adapter_dir = "./lora_adapter_initial"
+# model_id = "meta-llama/Meta-Llama-3-8B"
+# adapter_dir = "./lora_adapter_initial"
 
-print("HI")
+# print("HI")
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,                 # Switch to 4-bit
-    bnb_4bit_use_double_quant=True,    # Double quantization to save memory
-    bnb_4bit_quant_type="nf4",         # Best quantization type for accuracy
-    bnb_4bit_compute_dtype="float16"   # Use fp16 math (fp32 is slower but safer)
-)
+# bnb_config = BitsAndBytesConfig(
+#     load_in_4bit=True,                 # Switch to 4-bit
+#     bnb_4bit_use_double_quant=True,    # Double quantization to save memory
+#     bnb_4bit_quant_type="nf4",         # Best quantization type for accuracy
+#     bnb_4bit_compute_dtype="float16"   # Use fp16 math (fp32 is slower but safer)
+# )
 
-base_model = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    quantization_config=bnb_config,
-    device_map="auto",
-)
+# base_model = AutoModelForCausalLM.from_pretrained(
+#     model_id,
+#     quantization_config=bnb_config,
+#     device_map="auto",
+# )
 
-print("Loading tokenizer...")
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
+# print("Loading tokenizer...")
+# tokenizer = AutoTokenizer.from_pretrained(model_id)
+# if tokenizer.pad_token is None:
+#     tokenizer.pad_token = tokenizer.eos_token
 
-print("Attaching LoRA adapter...")
-model = PeftModel.from_pretrained(base_model, adapter_dir)
-model.eval()
+# print("Attaching LoRA adapter...")
+# model = PeftModel.from_pretrained(base_model, adapter_dir)
+# model.eval()
 
+# =======
+# >>>>>>> main
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
